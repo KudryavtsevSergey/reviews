@@ -346,13 +346,21 @@ if ($bAllowAccess)
 						}
 					}
 					// for single properties
-					else
-					{
-						if ($arResult["PROPERTY_LIST_FULL"][$propertyID]["PROPERTY_TYPE"] != "L")
-							$arUpdatePropertyValues[$propertyID] = $arPropertyValue[0];
-						else
-							$arUpdatePropertyValues[$propertyID] = $arPropertyValue;
-					}
+					else {
+                        if ($arResult["PROPERTY_LIST_FULL"][$propertyID]["PROPERTY_TYPE"] != "L")
+                            $arUpdatePropertyValues[$propertyID] = $arPropertyValue[0];
+                        else {
+                            //Менял тут (метка для поиска)
+                            $count = 1;
+                            foreach ($arResult["PROPERTY_LIST_FULL"][$propertyID]["ENUM"] as $k => $item){
+                                if($arPropertyValue == $count){
+                                    $arUpdatePropertyValues[$propertyID] = $k;
+                                    break;
+                                }
+                                $count++;
+                            }
+                        }
+                    }
 				}
 				// for file properties
 				else
@@ -370,6 +378,7 @@ if ($bAllowAccess)
 
 					if (empty($arUpdatePropertyValues[$propertyID]))
 						unset($arUpdatePropertyValues[$propertyID]);
+
 				}
 			}
 			else
@@ -436,7 +445,6 @@ if ($bAllowAccess)
 				}
 			}
 		}
-
 		// check required properties
 		foreach ($arParams["PROPERTY_CODES_REQUIRED"] as $key => $propertyID)
 		{
@@ -449,7 +457,7 @@ if ($bAllowAccess)
 				$arUserType = array();
 
 			//Files check
-			if ($arResult["PROPERTY_LIST_FULL"][$propertyID]['PROPERTY_TYPE'] == 'F')
+            if ($arResult["PROPERTY_LIST_FULL"][$propertyID]['PROPERTY_TYPE'] == 'F')
 			{
 				//New element
 				if ($arParams["ID"] <= 0)
@@ -499,7 +507,6 @@ if ($bAllowAccess)
 					$bCount = 0;
 					while ($arProperty = $dbProperty->Fetch())
 						$bCount++;
-
 					foreach ($propertyValue as $arFile)
 					{
 						if ($arFile['size'] > 0)
@@ -587,7 +594,7 @@ if ($bAllowAccess)
 			}
 			elseif (!is_array($propertyValue))
 			{
-                if($arResult["PROPERTY_LIST_FULL"][$propertyID]["CODE"] == "NAME") {
+                if($arResult["PROPERTY_LIST_FULL"][$propertyID]["CODE"] == "FIO") {
                     $GLOBALS["ID_FIO_REVIEW"] = $arResult["PROPERTY_LIST_FULL"][$propertyID]["ID"];
                 }
 				if(strlen($propertyValue) <= 0)
@@ -905,6 +912,7 @@ if ($bAllowAccess)
 		// load element properties
 		$rsElementProperties = CIBlockElement::GetProperty($arParams["IBLOCK_ID"], $arElement["ID"], $by="sort", $order="asc");
 		$arResult["ELEMENT_PROPERTIES"] = array();
+
 		while ($arElementProperty = $rsElementProperties->Fetch())
 		{
 			if(!array_key_exists($arElementProperty["ID"], $arResult["ELEMENT_PROPERTIES"]))
